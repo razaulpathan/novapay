@@ -1,0 +1,126 @@
+/* upi_style.css - Premium design for UPI linking flow */
+
+/* Gradient background for the whole page */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f3f6f9;
+}
+
+/* Card container with glass‑morphism effect */
+.upi-card {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.upi-card h1, .upi-card h2 {
+    margin-top: 0;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.upi-card label {
+    display: block;
+    margin: 1rem 0 0.5rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+.upi-card select,
+.upi-card input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    color: #f3f6f9;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.upi-card select:focus,
+.upi-card input[type="text"]:focus {
+    border-color: #83c5be;
+    background: rgba(255,255,255,0.12);
+}
+
+/* Primary button with subtle hover/active animation */
+.btn-primary {
+    display: inline-block;
+    background: #83c5be;
+    color: #1e3c72;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background: #4da699;
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+/* OTP/selection error message */
+.error {
+    color: #ff6b6b;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+/* List of UPI IDs */
+.upi-option {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.upi-option:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.upi-option input[type="radio"] {
+    margin: 0;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .upi-card {
+        padding: 1.5rem 1.75rem;
+    }
+    .btn-primary {
+        width: 100%;
+    }
+}
+

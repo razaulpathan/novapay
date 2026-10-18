@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Today Buy INR Rewards</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --orange: #f39c12;
+      --red-alert: #e74c3c;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-back {
+      color: #2c3e50;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .header-back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0 auto;
+      transform: translateX(-12px); /* Centering offset */
+    }
+
+    .content {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Summary Card */
+    .summary-card {
+      background: linear-gradient(135deg, #1fa2ff 0%, #12d6df 100%);
+      border-radius: 16px;
+      padding: 18px 14px;
+      color: #ffffff;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(31, 162, 255, 0.25);
+    }
+
+    .summary-card.yesterday {
+      background: linear-gradient(135deg, #3a7bd5 0%, #3a6073 100%);
+      box-shadow: 0 4px 12px rgba(58, 123, 213, 0.25);
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: bold;
+      opacity: 0.9;
+    }
+
+    .stat-val-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .coin-icon {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #ffe066 30%, #f5b041 90%);
+      border: 1px solid #d35400;
+      color: #d35400;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .stat-number {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Countdown Timer */
+    .timer-display {
+      font-size: 32px;
+      font-weight: 900;
+      color: #2c3e50;
+      text-align: center;
+      margin: 6px 0;
+      letter-spacing: 1px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Reminder Note */
+    .reminder-text {
+      color: var(--red-alert);
+      font-size: 12.5px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* Reward Items list */
+    .rewards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .reward-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+      gap: 14px;
+    }
+
+    .reward-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .gift-box-icon {
+      width: 42px;
+      height: 42px;
+      background: #fdf2e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .gift-box-icon svg {
+      width: 22px;
+      height: 22px;
+      color: #e67e22;
+    }
+
+    .reward-desc-text {
+      font-size: 13.5px;
+      font-weight: bold;
+      color: #2c3e50;
+      line-height: 1.4;
+    }
+
+    .reward-desc-text span {
+      color: var(--red-alert);
+      font-family: Arial, sans-serif;
+    }
+
+    /* Action button */
+    .gobuy-btn {
+      background: #2395ee;
+      color: #ffffff;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(35, 149, 238, 0.2);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .gobuy-btn:hover {
+      background: #0d7dd4;
+    }
+
+    .gobuy-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Floating Chat Button */
+    .fab {
+      position: absolute;
+      bottom: 24px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- Header title -->
+    <header class="header">
+      <a href="mine.html" class="header-back">
+        <!-- Back chevron SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <h1 class="header-title">Today Buy Inr Amount Rewards</h1>
+    </header>
+
+    <div class="content">
+      
+      <!-- Top Card (Level 0) -->
+      <div class="summary-card">
+        <div class="stat-box">
+          <span class="stat-label">Level 0 bonus</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">0</span>
+          </div>
+        </div>
+        <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.25);">
+          <span class="stat-label">Buy Inr Amount</span>
+          <div class="stat-val-wrapper">
+            <span class="stat-number">0/250000</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Received Rewards</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Card (Yesterday) -->
+      <div class="summary-card yesterday">
+        <div class="stat-box">
+          <span class="stat-label">Yesterday bonus</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">0</span>
+          </div>
+        </div>
+        <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2);">
+          <span class="stat-label">Yesterday Inr Amount</span>
+          <div class="stat-val-wrapper">
+            <span class="stat-number">0/250000</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Yesterday Rewards</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Countdown Timer -->
+      <div class="timer-display" id="timerClock">02 : 39 : 44</div>
+
+      <!-- Red warning description -->
+      <p class="reminder-text">
+        Reminder: Rewards for today will be sent tomorrow, and yesterday's records will be cleared. Please check "Mine &rarr; Today Profit &rarr; Event Reward".
+      </p>
+
+      <!-- Rewards tiers checklist -->
+      <div class="rewards-list">
+        
+        <!-- Tier 1 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <!-- Gift SVG -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>50000</span> amount:<br>Reward of <span>200</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+        <!-- Tier 2 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>70000</span> amount:<br>Reward of <span>300</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+        <!-- Tier 3 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>90000</span> amount:<br>Reward of <span>400</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+        <!-- Tier 4 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>110000</span> amount:<br>Reward of <span>500</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+        <!-- Tier 5 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>130000</span> amount:<br>Reward of <span>600</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+        <!-- Tier 6 -->
+        <div class="reward-item">
+          <div class="reward-left">
+            <div class="gift-box-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-desc-text">
+              Buy a total of <span>150000</span> amount:<br>Reward of <span>700</span>
+            </div>
+          </div>
+          <button class="gobuy-btn" onclick="location.href='upibuyplus.html'">Go Buy</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+  </div>
+
+  <script>
+    // Real-time Countdown Timer Script
+    let secondsLeft = 2 * 3600 + 39 * 60 + 44; // 02:39:44 in seconds
+
+    function updateTimerDisplay() {
+      const hours = Math.floor(secondsLeft / 3600);
+      const minutes = Math.floor((secondsLeft % 3600) / 60);
+      const seconds = secondsLeft % 60;
+
+      const displayHours = hours < 10 ? '0' + hours : hours;
+      const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+      const displaySeconds = seconds < 10 ? '0' + seconds : seconds;
+
+      document.getElementById('timerClock').textContent = 
+        `${displayHours} : ${displayMinutes} : ${displaySeconds}`;
+    }
+
+    const timerInterval = setInterval(() => {
+      if (secondsLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timerClock').textContent = "00 : 00 : 00";
+        return;
+      }
+      secondsLeft--;
+      updateTimerDisplay();
+    }, 1000);
+
+    // Initial call
+    updateTimerDisplay();
+  </script>
+</body>
+</html>

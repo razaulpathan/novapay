@@ -1,0 +1,853 @@
+<?php
+// agent.php - Team & Referral Commission Stats
+require_once 'db.php';
+requireLogin();
+
+// Fetch current user details
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user = $stmt->fetch();
+
+if (!$user) {
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
+
+$user_id = $user['id'];
+
+// 1. Team Count queries
+// Level 1 count
+$stmtL1 = $pdo->prepare("SELECT COUNT(*) FROM users WHERE referred_by = ?");
+$stmtL1->execute([$user_id]);
+$l1_count = $stmtL1->fetchColumn();
+
+// Level 2 count
+$stmtL2 = $pdo->prepare("SELECT COUNT(*) FROM users u2 JOIN users u1 ON u2.referred_by = u1.id WHERE u1.referred_by = ?");
+$stmtL2->execute([$user_id]);
+$l2_count = $stmtL2->fetchColumn();
+
+$team_count = $l1_count + $l2_count;
+
+// 2. Commissions Calculations
+$l1_rate = floatval(getSetting('commission_l1_rate') ?: '0.003');
+$l2_rate = floatval(getSetting('commission_l2_rate') ?: '0.002');
+
+// Total Level 1 commission
+$stmtCommL1 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u ON bo.user_id = u.id WHERE u.referred_by = ? AND bo.status = 'Success'");
+$stmtCommL1->execute([$user_id]);
+$comm_l1 = $stmtCommL1->fetchColumn() * $l1_rate;
+
+// Total Level 2 commission
+$stmtCommL2 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u2 ON bo.user_id = u2.id JOIN users u1 ON u2.referred_by = u1.id WHERE u1.referred_by = ? AND bo.status = 'Success'");
+$stmtCommL2->execute([$user_id]);
+$comm_l2 = $stmtCommL2->fetchColumn() * $l2_rate;
+
+$total_commission = $comm_l1 + $comm_l2;
+
+// Today Team Commission
+$stmtCommTodayL1 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u ON bo.user_id = u.id WHERE u.referred_by = ? AND bo.status = 'Success' AND DATE(bo.created_at) = CURRENT_DATE()");
+$stmtCommTodayL1->execute([$user_id]);
+$comm_today_l1 = $stmtCommTodayL1->fetchColumn() * $l1_rate;
+
+$stmtCommTodayL2 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u2 ON bo.user_id = u2.id JOIN users u1 ON u2.referred_by = u1.id WHERE u1.referred_by = ? AND bo.status = 'Success' AND DATE(bo.created_at) = CURRENT_DATE()");
+$stmtCommTodayL2->execute([$user_id]);
+$comm_today_l2 = $stmtCommTodayL2->fetchColumn() * $l2_rate;
+
+$today_team_commission = $comm_today_l1 + $comm_today_l2;
+
+// Yesterday Team Commission
+$stmtCommYestL1 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u ON bo.user_id = u.id WHERE u.referred_by = ? AND bo.status = 'Success' AND DATE(bo.created_at) = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)");
+$stmtCommYestL1->execute([$user_id]);
+$comm_yest_l1 = $stmtCommYestL1->fetchColumn() * $l1_rate;
+
+$stmtCommYestL2 = $pdo->prepare("SELECT COALESCE(SUM(price), 0) FROM buy_orders bo JOIN users u2 ON bo.user_id = u2.id JOIN users u1 ON u2.referred_by = u1.id WHERE u1.referred_by = ? AND bo.status = 'Success' AND DATE(bo.created_at) = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)");
+$stmtCommYestL2->execute([$user_id]);
+$comm_yest_l2 = $stmtCommYestL2->fetchColumn() * $l2_rate;
+
+$yesterday_team_commission = $comm_yest_l1 + $comm_yest_l2;
+
+// My Total Profit (Total profit accumulated by user transactions + team commissions)
+$my_total_profit = $user['today_profit'] + $total_commission; // A logical dynamic sum
+
+// Daily Commission Task target
+$daily_target = 500.00;
+$progress_percentage = 0;
+if ($today_team_commission > 0) {
+    $progress_percentage = min(100, round(($today_team_commission / $daily_target) * 100));
+}
+
+// Generate referral link dynamically using current host name
+$http_protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$referral_link = $http_protocol . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/register.php?ref=' . $user['referral_code'];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NextPay - Team</title>
+  <!-- Link to premium styles -->
+  <link rel="stylesheet" href="website_style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --orange: #f39c12;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .content {
+      padding: 16px 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Profile Header Section */
+    .profile-section {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 16px;
+      border-bottom: 8px solid #f7f9fc;
+    }
+
+    .avatar-wrapper {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #eef5fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #d4e6f1;
+      overflow: hidden;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .reward-badge {
+      color: #7f8c8d;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .user-id-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-id {
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+      font-family: Arial, sans-serif;
+    }
+
+    .chevron-right {
+      color: var(--muted);
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Stats List */
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid #f2f5f8;
+      text-decoration: none;
+      color: inherit;
+      transition: background-color 0.2s;
+    }
+
+    .stat-row:active {
+      background-color: #fafbfc;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+    }
+
+    .stat-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-val-blue {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--blue);
+      font-family: Arial, sans-serif;
+    }
+
+    .stat-val-orange {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--orange);
+      font-family: Arial, sans-serif;
+    }
+
+    /* Progress/Task Bar Section */
+    .task-progress-section {
+      padding: 20px;
+      border-bottom: 8px solid #f7f9fc;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 28px;
+      background: #eff3f6;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: <?= $progress_percentage ?>%;
+      background: linear-gradient(90deg, #5dade2, #2980b9);
+      transition: width 0.3s ease;
+      z-index: 1;
+    }
+
+    .progress-label-left, .progress-label-right, .progress-label-center {
+      font-size: 13px;
+      font-weight: bold;
+      color: #7d93a8;
+      z-index: 2;
+      font-family: Arial, sans-serif;
+    }
+
+    .progress-label-center {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      color: #34495e;
+    }
+
+    /* Referral Link Box Section */
+    .referral-section {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .referral-node {
+      display: flex;
+      gap: 16px;
+      position: relative;
+    }
+
+    .node-icon-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 32px;
+    }
+
+    .node-icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #eaf2f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+    }
+
+    .node-line {
+      width: 2px;
+      flex: 1;
+      background: #d4e6f1;
+      margin: 4px 0;
+    }
+
+    .node-content {
+      flex: 1;
+      padding-bottom: 8px;
+    }
+
+    .invite-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .invite-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+    }
+
+    .toggle-hide-btn {
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .link-display-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f7f9fc;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid #eef2f6;
+      margin-bottom: 4px;
+    }
+
+    .link-text {
+      font-size: 12px;
+      color: #7f8c8d;
+      font-family: Arial, sans-serif;
+      word-break: break-all;
+      flex: 1;
+      margin-right: 8px;
+    }
+
+    .link-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qr-btn {
+      color: #e67e22;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .copy-btn {
+      color: var(--blue);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .qr-btn svg, .copy-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .commission-rate-text {
+      font-size: 15px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin-top: 4px;
+    }
+
+    .commission-rate-text span {
+      color: var(--orange);
+    }
+
+    /* Floating Chat Button */
+    .fab {
+      position: absolute;
+      bottom: 84px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Bottom navigation tabs */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 574px);
+      height: 64px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+      width: 20%;
+      height: 100%;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--blue);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Custom Alert for Copied Link */
+    .toast-alert {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.8);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    .toast-alert.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- Header title -->
+    <header class="header">
+      <h1 class="header-title">Team</h1>
+    </header>
+
+    <div class="content">
+      
+      <!-- User Profile Header -->
+      <div class="profile-section" onclick="location.href='account_info.php'" style="cursor: pointer;">
+        <div class="avatar-wrapper">
+          <!-- Avatar SVG -->
+          <svg viewBox="0 0 120 120" style="width: 100%; height: 100%;">
+            <circle cx="60" cy="60" r="60" fill="#e2eefc"/>
+            <path d="M60 70 A 24 24 0 0 0 36 94 A 8 8 0 0 0 44 102 L 76 102 A 8 8 0 0 0 84 94 A 24 24 0 0 0 60 70 Z" fill="#07588f"/>
+            <circle cx="60" cy="46" r="16" fill="#fbb0ac" />
+            <path d="M44 46 Q60 54 76 46 Z" fill="#07588f" opacity="0.3"/>
+            <rect x="58" y="58" width="4" height="14" rx="2" fill="#fbb0ac"/>
+            <path d="M44 38 Q60 30 76 38" fill="none" stroke="#07588f" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="profile-info">
+          <span class="reward-badge">Reward:<?= number_format($user['reward_rate'], 2, '.', '') ?>%</span>
+          <div class="user-id-row">
+            <span class="user-id">ID:<?= sanitize($user['id']) ?></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team stats list -->
+      <div class="stats-list">
+        
+        <a href="old_rf.php" class="stat-row">
+          <span class="stat-label">Team Count</span>
+          <div class="stat-right">
+            <span class="stat-val-blue"><?= intval($team_count) ?></span>
+            <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </a>
+
+        <div class="stat-row">
+          <span class="stat-label">Total Commission</span>
+          <div class="stat-right">
+            <span class="stat-val-blue"><?= number_format($total_commission, 2, '.', '') ?></span>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <span class="stat-label">My Total Profit</span>
+          <div class="stat-right">
+            <span class="stat-val-blue"><?= number_format($my_total_profit, 2, '.', '') ?></span>
+            <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <a href="old_rf.php" class="stat-row">
+          <span class="stat-label">Invite Friends Reward</span>
+          <div class="stat-right">
+            <span class="stat-val-blue">View</span>
+            <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </a>
+
+        <div class="stat-row" onclick="openCommissionDetail()" style="cursor: pointer;">
+          <span class="stat-label">Yesterday Team Commission</span>
+          <div class="stat-right">
+            <span class="stat-val-blue"><?= number_format($yesterday_team_commission, 2, '.', '') ?></span>
+            <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-row" onclick="openCommissionDetail()" style="cursor: pointer;">
+          <span class="stat-label">Today Team Commission</span>
+          <div class="stat-right">
+            <span class="stat-val-orange"><?= number_format($today_team_commission, 2, '.', '') ?></span>
+            <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Task Progress Bar -->
+      <div class="task-progress-section">
+        <div class="progress-bar-container">
+          <div class="progress-fill"></div>
+          <span class="progress-label-left">0</span>
+          <span class="progress-label-center">Daily Commission Tasks <?= $progress_percentage ?>%</span>
+          <span class="progress-label-right"><?= intval($daily_target) ?></span>
+        </div>
+      </div>
+
+      <!-- Invitation link details nodes -->
+      <div class="referral-section">
+        
+        <!-- Node 1: Invitation Link -->
+        <div class="referral-node">
+          <div class="node-icon-col">
+            <div class="node-icon-circle">
+              <!-- Single User SVG -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="node-line"></div>
+          </div>
+          <div class="node-content">
+            <div class="invite-header-row">
+              <span class="invite-title">Invitation Link</span>
+              <span class="toggle-hide-btn" id="toggleLinkBtn" onclick="toggleLinkDisplay()">Hide</span>
+            </div>
+            <div class="link-display-row">
+              <span class="link-text" id="linkText"><?= sanitize($referral_link) ?></span>
+              <div class="link-actions">
+                <!-- QR Code Icon -->
+                <span class="qr-btn" title="View QR">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                </span>
+                <!-- Copy Icon -->
+                <span class="copy-btn" onclick="copyLinkAddress()" title="Copy Link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Node 2: Level 1 Commission -->
+        <div class="referral-node">
+          <div class="node-icon-col">
+            <div class="node-icon-circle">
+              <!-- Two Users SVG -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M9 21v-2a4 4 0 0 0-4-4H3a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="node-line"></div>
+          </div>
+          <div class="node-content" style="padding-top: 4px;">
+            <div class="commission-rate-text">
+              Level 1 Commission = Buy * <span><?= ($l1_rate * 100) ?> %</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Node 3: Level 2 Commission -->
+        <div class="referral-node">
+          <div class="node-icon-col">
+            <div class="node-icon-circle">
+              <!-- Three Users SVG -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="node-content" style="padding-top: 4px;">
+            <div class="commission-rate-text">
+              Level 2 Commission = Buy * <span><?= ($l2_rate * 100) ?> %</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab" onclick="location.href='customer.php'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+    <!-- Bottom navigation tabs -->
+    <nav class="bottom-nav">
+      <a href="home.php" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Home
+      </a>
+      <a href="upibuyplus.php" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        Buy
+      </a>
+      <a href="kycpa.php" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        UPI
+      </a>
+      <a href="agent.php" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Team
+      </a>
+      <a href="mine.php" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Mine
+      </a>
+    </nav>
+
+    <!-- Custom Toast Alert -->
+    <div class="toast-alert" id="toastAlert">Link copied successfully!</div>
+
+  </div>
+
+  <script>
+    let isLinkHidden = false;
+    const fullLink = "<?= $referral_link ?>";
+
+    function toggleLinkDisplay() {
+      const linkTextSpan = document.getElementById('linkText');
+      const toggleBtn = document.getElementById('toggleLinkBtn');
+      
+      if (isLinkHidden) {
+        linkTextSpan.textContent = fullLink;
+        toggleBtn.textContent = "Hide";
+        isLinkHidden = false;
+      } else {
+        // Show masked link
+        linkTextSpan.textContent = fullLink.substring(0, 24) + "••••••••••••••";
+        toggleBtn.textContent = "Show";
+        isLinkHidden = true;
+      }
+    }
+
+    function copyLinkAddress() {
+      const tempInput = document.createElement('input');
+      tempInput.value = fullLink;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      const toast = document.getElementById('toastAlert');
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1500);
+    }
+
+    // Commission Details Modal
+    function openCommissionDetail() {
+      document.getElementById('commission-detail-modal').style.display = 'flex';
+    }
+
+    function closeCommissionDetail() {
+      document.getElementById('commission-detail-modal').style.display = 'none';
+    }
+
+    // Auto-show popup on login if yesterday commission >= 500
+    <?php if ($yesterday_team_commission >= 500): ?>
+    window.addEventListener('DOMContentLoaded', function() {
+      // Only show once per session using sessionStorage
+      if (!sessionStorage.getItem('comm_popup_shown')) {
+        sessionStorage.setItem('comm_popup_shown', '1');
+        openCommissionDetail();
+      }
+    });
+    <?php endif; ?>
+  </script>
+
+  <!-- Commission Detail Modal -->
+  <div id="commission-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #fff; border-radius: 16px; width: 100%; max-width: 360px; padding: 28px 24px 20px; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">
+      <!-- Close X -->
+      <span onclick="closeCommissionDetail()" style="position: absolute; right: 20px; top: 18px; font-size: 20px; color: #aaa; cursor: pointer; line-height: 1;">&times;</span>
+
+      <!-- Title -->
+      <h2 style="text-align: center; font-size: 20px; font-weight: 800; color: #2c3e50; margin: 0 0 24px;">Details</h2>
+
+      <!-- ID Row -->
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 15px; font-weight: 700;">
+        <span style="color: #7f8c8d;">ID</span>
+        <span style="color: #f39c12;"><?= $user['id'] ?></span>
+      </div>
+
+      <!-- Yesterday Commission Row -->
+      <div style="display: flex; justify-content: space-between; margin-bottom: 18px; font-size: 15px; font-weight: 700;">
+        <span style="color: #2c3e50; font-weight: 800;">Yesterday Commission</span>
+        <span style="color: #f39c12;"><?= number_format($yesterday_team_commission, 2, '.', '') ?></span>
+      </div>
+
+      <!-- Description text -->
+      <p style="font-size: 13px; color: #7f8c8d; line-height: 1.65; margin-bottom: 24px;">
+        Take a screenshot of this interface and click Go to jump to your customer service group. Send the screenshot to customer service to claim the reward.<br>
+        Tip: The minimum commission required to get the reward is 500. Please make sure to meet this requirement before claiming!<br>
+        Collection time: 11:00-21:00 the next day.
+      </p>
+
+      <!-- Go Button -->
+      <?php $support_link = getSetting('support_telegram_vip') ?: 'https://t.me/NextPay_vip'; ?>
+      <a href="<?= sanitize($support_link) ?>" target="_blank" style="display: block; width: 100%; background: #2395ee; color: #fff; text-align: center; font-size: 17px; font-weight: 800; padding: 16px; border-radius: 10px; text-decoration: none; margin-bottom: 14px;">Go</a>
+
+      <!-- Close link -->
+      <div style="text-align: center;">
+        <span onclick="closeCommissionDetail()" style="color: #2395ee; font-size: 16px; font-weight: 700; cursor: pointer;">Close</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+

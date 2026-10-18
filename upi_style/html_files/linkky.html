@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Link New UPI</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --red-warning: #e74c3c;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-back {
+      color: #2c3e50;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .header-back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0 auto;
+      transform: translateX(-12px); /* Centering offset */
+    }
+
+    .content {
+      padding: 24px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* List Item Box Row */
+    .link-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 4px;
+      border-bottom: 1.5px solid #f2f5f8;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .row-label {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111111;
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .row-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      flex: 1;
+      text-align: left;
+    }
+
+    .row-value.placeholder-style {
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    .chevron {
+      color: var(--muted);
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Form Fields Container */
+    .form-fields {
+      display: none; /* Hidden until partner selected */
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-fields.show {
+      display: flex;
+    }
+
+    /* Input styling */
+    .text-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 18px;
+      font-family: inherit;
+      color: #2c3e50;
+      padding: 0;
+      background: transparent;
+    }
+
+    .text-input::placeholder {
+      color: var(--muted);
+    }
+
+    /* Red error prompt */
+    .error-prompt {
+      color: var(--red-warning);
+      font-size: 12px;
+      font-weight: bold;
+      margin: 4px 4px 0;
+      display: none;
+    }
+
+    .error-prompt.show {
+      display: block;
+    }
+
+    /* Blue subtext */
+    .retry-text {
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    /* Bottom Button styling */
+    .submit-btn-container {
+      margin-top: auto;
+      padding: 10px 0;
+      display: none;
+    }
+
+    .submit-btn-container.show {
+      display: block;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 54px;
+      border: none;
+      background: #2395ee;
+      color: #ffffff;
+      border-radius: 12px;
+      font: 800 18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(35, 149, 238, 0.25);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .submit-btn:hover {
+      background: #0d7dd4;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Partner Selection Sheet Overlay */
+    .selection-sheet {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 150;
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .sheet-content {
+      background: #ffffff;
+      width: 100%;
+      border-radius: 20px 20px 0 0;
+      padding: 16px 0;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: slideUp 0.2s ease forwards;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #7f8c8d;
+      padding: 10px 20px;
+      border-bottom: 1px solid #f2f5f8;
+      text-align: center;
+    }
+
+    .sheet-option {
+      padding: 16px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .sheet-option:hover {
+      background: #f7f9fc;
+    }
+
+    .sheet-cancel {
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--blue);
+      cursor: pointer;
+      text-align: center;
+      border-top: 5px solid #f2f5f8;
+    }
+
+    /* Floating Chat Button */
+    .fab {
+      position: absolute;
+      bottom: 24px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- Header title -->
+    <header class="header">
+      <a href="kycpa.html" class="header-back">
+        <!-- Back chevron SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <h1 class="header-title">Link New UPI</h1>
+    </header>
+
+    <div class="content">
+      
+      <!-- Partner Selection row -->
+      <div class="link-row" onclick="openPartnerSheet()">
+        <span class="row-label">Partner</span>
+        <span class="row-value placeholder-style" id="partnerVal">select the kyc partner</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+
+      <!-- Additional fields shown after selection -->
+      <div class="form-fields" id="formFields">
+        
+        <!-- Name Field -->
+        <div class="link-row">
+          <span class="row-label">Name</span>
+          <input type="text" class="text-input" placeholder="Enter your name" id="nameInput">
+        </div>
+
+        <!-- Phone/UPI No Field -->
+        <div class="link-row" style="flex-direction: column; align-items: stretch; border-bottom: none; padding-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #f2f5f8; padding-bottom: 16px;">
+            <span class="row-label">UPI No</span>
+            <input type="tel" class="text-input" placeholder="Enter Phone No" id="phoneInput" oninput="validatePhone()">
+          </div>
+          <!-- Red error tag -->
+          <div class="error-prompt" id="errorPrompt">Please enter a 10-digit mobile number.</div>
+        </div>
+
+        <!-- Retry links -->
+        <div class="retry-text" onclick="alert('Retrying connection...')">UPI List not Loading? Tap to retry.</div>
+
+      </div>
+
+      <!-- Bottom submit btn -->
+      <div class="submit-btn-container" id="submitBtnContainer">
+        <button class="submit-btn" onclick="submitKYC()">Link Kyc</button>
+      </div>
+
+    </div>
+
+    <!-- Partner Select Sheet Dialog -->
+    <div class="selection-sheet" id="partnerSheet">
+      <div class="sheet-content">
+        <div class="sheet-title">Select KYC Partner</div>
+        <div class="sheet-option" onclick="selectPartner('Mobikwik')">Mobikwik</div>
+        <div class="sheet-option" onclick="selectPartner('Paytm')">Paytm</div>
+        <div class="sheet-option" onclick="selectPartner('PhonePe')">PhonePe</div>
+        <div class="sheet-cancel" onclick="closePartnerSheet()">Cancel</div>
+      </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+  </div>
+
+  <script>
+    function openPartnerSheet() {
+      document.getElementById('partnerSheet').style.display = 'flex';
+    }
+
+    function closePartnerSheet() {
+      document.getElementById('partnerSheet').style.display = 'none';
+    }
+
+    function selectPartner(partnerName) {
+      const partnerVal = document.getElementById('partnerVal');
+      partnerVal.textContent = partnerName;
+      partnerVal.classList.remove('placeholder-style');
+      closePartnerSheet();
+
+      // Show other fields and action buttons
+      document.getElementById('formFields').classList.add('show');
+      document.getElementById('submitBtnContainer').classList.add('show');
+    }
+
+    function validatePhone() {
+      const phoneInput = document.getElementById('phoneInput');
+      const errorPrompt = document.getElementById('errorPrompt');
+      const digits = phoneInput.value.replace(/\D/g, '');
+
+      // Show error warning if user has typed something and it's not a 10 digit number
+      if (digits.length > 0 && digits.length !== 10) {
+        errorPrompt.classList.add('show');
+      } else {
+        errorPrompt.classList.remove('show');
+      }
+    }
+
+    function submitKYC() {
+      const name = document.getElementById('nameInput').value.trim();
+      const phone = document.getElementById('phoneInput').value.trim();
+      
+      if (!name || phone.length !== 10) {
+        alert("Please complete the form correctly with a 10-digit mobile number.");
+        return;
+      }
+      
+      alert("UPI Account Linked Successfully!");
+      window.location.href = "kycpa.html";
+    }
+  </script>
+</body>
+</html>

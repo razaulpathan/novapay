@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Special Events</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --accent-orange: #ff9933;
+      --accent-green: #138808;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: var(--bg-color);
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollable content area */
+    .content {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Banner Slider Card with Cow Mascot */
+    .banner {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #0b5cd3 0%, #053b92 100%);
+      border-radius: 16px;
+      color: white;
+      padding: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(11, 92, 211, 0.2);
+    }
+
+    .banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo-mark {
+      width: 24px;
+      height: 28px;
+    }
+
+    .brand-name {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .upi-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1;
+    }
+
+    .upi-logo-text {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .upi-logo-text span {
+      color: #ff9933;
+    }
+
+    .upi-logo-text span:last-child {
+      color: #138808;
+    }
+
+    .upi-sub {
+      font-size: 6px;
+      font-weight: bold;
+      opacity: 0.8;
+      letter-spacing: 0.2px;
+    }
+
+    /* Cow Mascot Banner Styling */
+    .banner-body-cow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      z-index: 2;
+      margin-top: 6px;
+    }
+
+    .banner-text-left {
+      max-width: 60%;
+    }
+
+    .banner-title-cow {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin: 0;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .banner-subtitle-cow {
+      font-size: 9px;
+      opacity: 0.85;
+      margin: 4px 0 0 0;
+    }
+
+    .banner-mascot-right {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .banner-floating-coins {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .banner-coin {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #ffe066 30%, #f5b041 90%);
+      border: 0.8px solid #d35400;
+      color: #d35400;
+      border-radius: 50%;
+      font-size: 8px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1.5px 3px rgba(0,0,0,0.2);
+    }
+
+    .banner-coin.c1 { top: 5px; left: 5px; }
+    .banner-coin.c2 { top: 40px; right: 2px; }
+    .banner-coin.c3 { bottom: 5px; left: 15px; }
+
+    /* Slider Dots Indicators */
+    .slider-dots {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+      margin-bottom: 2px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .dot.active {
+      width: 18px;
+      border-radius: 3px;
+      background: #ffffff;
+    }
+
+    /* IToken Balance Card Section */
+    .balance-card {
+      margin-top: 16px;
+      background: #fffdf4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23f9ebd2" stroke-width="1.5" stroke-dasharray="4,4"/><path d="M42 35 h16 M42 45 h16 M50 35 v30 M42 65 h16" fill="none" stroke="%23f9ebd2" stroke-width="2"/></svg>') repeat;
+      background-size: 120px;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #f2e6cb;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .balance-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .balance-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #3f3d32;
+      margin: 0;
+    }
+
+    .exchange-rate {
+      font-size: 11px;
+      color: #8c8877;
+      font-family: Arial, sans-serif;
+    }
+
+    .balance-display-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .balance-amount-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flag-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flag-stripe {
+      height: 14px;
+      width: 100%;
+    }
+
+    .flag-stripe.orange { background: #ff9933; }
+    .flag-stripe.white {
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .flag-stripe.green { background: #138808; }
+    .flag-wheel {
+      width: 8px;
+      height: 8px;
+      border: 1px solid #000080;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .flag-wheel::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #000080 20%, transparent 30%);
+    }
+
+    .balance-value {
+      font-size: 40px;
+      font-weight: 900;
+      color: #2b2b2b;
+      line-height: 1;
+    }
+
+    /* Buy button */
+    .buy-btn {
+      background: #1c82e6;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(28, 130, 230, 0.3);
+      font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .buy-btn:hover {
+      background: #0f6fcd;
+    }
+
+    .buy-btn:active {
+      transform: scale(0.97);
+    }
+
+    .rupee-circle {
+      width: 22px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* Statistics Grid Layout */
+    .stats-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stats-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #7d7d7d;
+      font-weight: bold;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      color: #111111;
+      font-weight: 900;
+    }
+
+    .stat-value.link {
+      color: #1c82e6;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* History Button Styles */
+    .history-card {
+      background: #ffffff;
+      border: 1px solid #e1e8ed;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      min-height: 52px;
+    }
+
+    .history-card:hover {
+      background-color: #fafbfc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Notice Bar section */
+    .notice-bar {
+      margin-top: 14px;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .notice-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #555555;
+    }
+
+    .notice-left svg {
+      color: #888888;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .notice-info-btn {
+      color: #b8c0c8;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .notice-info-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* News Feed Section */
+    .news-card {
+      margin-top: 14px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f5f7fa;
+      padding-bottom: 8px;
+    }
+
+    .news-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #111111;
+      margin: 0;
+    }
+
+    .news-more {
+      font-size: 13px;
+      color: #95a5a6;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+    }
+
+    .news-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .news-item-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333333;
+    }
+
+    .news-item-date {
+      font-size: 11px;
+      color: #bdc3c7;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Floating Chat Action Button */
+    .fab {
+      position: absolute;
+      bottom: 96px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.2s;
+    }
+
+    .fab:hover {
+      transform: scale(1.05);
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Bottom Tab Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 574px);
+      height: 64px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+      width: 20%;
+      height: 100%;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--blue);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* MODAL POPUP SYSTEM STYLING */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      z-index: 200;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 20px;
+      padding: 20px 14px 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: modalAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+    }
+
+    @keyframes modalAppear {
+      from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-section-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      color: #111;
+      margin: 6px 0 2px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Card 1: 300 INR / Person */
+    .promo-card-blue {
+      background: linear-gradient(135deg, #0f3c83 0%, #061c47 100%);
+      border-radius: 12px;
+      color: #ffffff;
+      padding: 16px 14px 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .promo-badge {
+      background: #ffffff;
+      color: #0f3c83;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .promo-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .promo-list {
+      margin: 0;
+      padding-left: 14px;
+      list-style-type: disc;
+      font-size: 11px;
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .promo-list li {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .promo-image-container {
+      width: 76px;
+      height: 76px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Card 2: Buy Order Rewards */
+    .promo-card-darkblue {
+      background: linear-gradient(180deg, #0e5fc5 0%, #063172 100%);
+      border-radius: 12px;
+      color: #ffffff;
+      padding: 14px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .event-banner-header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .event-brand {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: block;
+    }
+
+    .event-title {
+      font-size: 16px;
+      font-weight: 900;
+      margin: 4px 0 2px;
+      color: #fff;
+    }
+
+    .event-subtitle {
+      font-size: 11px;
+      opacity: 0.9;
+      margin: 0 0 4px;
+    }
+
+    .event-action {
+      color: #fecb2f;
+      font-size: 13px;
+      font-weight: 900;
+      margin: 0 0 6px;
+      text-decoration: underline;
+      letter-spacing: 0.5px;
+    }
+
+    .rewards-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      padding: 10px 8px;
+      margin-bottom: 8px;
+    }
+
+    .rewards-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .reward-row {
+      font-size: 9.5px;
+      font-weight: bold;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .reward-row .bullet {
+      color: #fecb2f;
+      margin-right: 2px;
+      font-weight: 900;
+    }
+
+    .event-footer {
+      font-size: 8px;
+      line-height: 1.35;
+      opacity: 0.95;
+    }
+
+    .event-footer p {
+      margin: 0 0 4.5px;
+    }
+
+    .event-footer p.highlight {
+      color: #fecb2f;
+      font-size: 8.5px;
+      font-weight: 900;
+      margin-bottom: 0;
+    }
+
+    /* Card 3: Yesterday Team Commission */
+    .promo-card-yellow {
+      background: linear-gradient(180deg, #fef4db 0%, #fae2ab 100%);
+      border-radius: 12px;
+      color: #4a340b;
+      padding: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ebd39b;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-banner-header.text-dark {
+      color: #4a340b;
+    }
+
+    .brand-dark {
+      color: #07588f;
+    }
+
+    .title-teal {
+      color: #0d6b6b;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .subtitle-orange {
+      color: #d35400;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .commission-list {
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .commission-row {
+      font-size: 11px;
+      font-weight: bold;
+      color: #3f2e0a;
+    }
+
+    /* Confirm Button styling */
+    .modal-confirm-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .confirm-btn {
+      background: transparent;
+      border: none;
+      color: #2395ee;
+      font-size: 18px;
+      font-weight: 900;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      padding: 8px 30px;
+      transition: transform 0.2s, color 0.2s;
+      outline: none;
+    }
+
+    .confirm-btn:hover {
+      transform: scale(1.05);
+      color: #07588f;
+    }
+
+    .confirm-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Media query styles */
+    @media (max-width: 430px) {
+      .balance-value {
+        font-size: 32px;
+      }
+      .flag-circle {
+        width: 36px;
+        height: 36px;
+      }
+      .flag-stripe {
+        height: 12px;
+      }
+      .buy-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      .stats-layout {
+        gap: 8px;
+      }
+      .history-card {
+        padding: 12px;
+        font-size: 14px;
+      }
+      .modal-content {
+        padding: 16px 10px 12px;
+        gap: 10px;
+      }
+      .modal-section-title {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- MAIN HOME CONTENT (BACKGROUND) -->
+    <div class="content">
+      
+      <!-- Top banner slider with Cow Mascot -->
+      <div class="banner bg-cow-theme">
+        <div class="banner-header">
+          <div class="logo-container">
+            <svg class="logo-mark" viewBox="0 0 160 185" role="img" aria-label="Sixpay logo">
+              <path d="M109 2C70 4 35 27 17 62-6 106 9 163 51 180c39 16 88-3 102-44 12-36-5-77-40-94-14-7-31-9-44-5-5 2-8-5-4-9C75 18 89 11 109 8c5-1 7-7 0-6Z" fill="#ffffff"/>
+              <rect x="44" y="95" width="72" height="54" rx="12" fill="none" stroke="#0b5cd3" stroke-width="8"/>
+              <rect x="61" y="114" width="18" height="12" rx="3" fill="#0b5cd3"/>
+              <path d="M106 49c16 7 25 20 28 38" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+              <path d="M119 30c23 10 36 29 39 55" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+              <path d="M94 67c9 5 15 13 17 24" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+            </svg>
+            <div class="brand-name">SIXPAY</div>
+          </div>
+          <div class="upi-brand">
+            <div class="upi-logo-text">U<span>P</span>I</div>
+            <div class="upi-sub">NATIVE THIRD PARTY PAYMENT</div>
+          </div>
+        </div>
+
+        <div class="banner-body-cow">
+          <div class="banner-text-left">
+            <h2 class="banner-title-cow">India's Best</h2>
+            <h2 class="banner-title-cow">Third-Party</h2>
+            <h2 class="banner-title-cow">Payment</h2>
+            <h2 class="banner-title-cow">Gateway</h2>
+            <p class="banner-subtitle-cow">Fast Settlements & Multi-currency payouts</p>
+          </div>
+          <div class="banner-mascot-right">
+            <!-- Cute Cow Cartoon Mascot SVG -->
+            <svg viewBox="0 0 120 120" style="width: 84px; height: 84px;">
+              <circle cx="60" cy="60" r="42" fill="#ffe066" />
+              <circle cx="60" cy="60" r="36" fill="#ffe57f" />
+              <!-- Horns -->
+              <path d="M45 42 Q38 30 40 23 Q48 28 50 38 Z" fill="#d35400" />
+              <path d="M75 42 Q82 30 80 23 Q72 28 70 38 Z" fill="#d35400" />
+              <!-- Ears -->
+              <path d="M38 48 Q28 48 32 55 Q42 55 42 50 Z" fill="#ffffff" stroke="#e0e0e0" stroke-width="0.5"/>
+              <path d="M38 48 Q28 48 32 55 Q42 55 42 50 Z" fill="#ffccd5" opacity="0.6"/>
+              <path d="M82 48 Q92 48 88 55 Q78 55 78 50 Z" fill="#ffffff" stroke="#e0e0e0" stroke-width="0.5"/>
+              <path d="M82 48 Q92 48 88 55 Q78 55 78 50 Z" fill="#ffccd5" opacity="0.6"/>
+              <!-- Head -->
+              <ellipse cx="60" cy="58" rx="24" ry="20" fill="#ffffff" />
+              <!-- Face patch -->
+              <path d="M42 48 C45 40, 52 42, 50 52 C45 56, 40 52, 42 48 Z" fill="#34495e" />
+              <path d="M78 50 C75 42, 68 44, 70 54 C75 58, 80 54, 78 50 Z" fill="#34495e" />
+              <!-- Eyes -->
+              <circle cx="50" cy="52" r="3.5" fill="#2c3e50" />
+              <circle cx="50" cy="50.5" r="1" fill="#ffffff" />
+              <circle cx="70" cy="52" r="3.5" fill="#2c3e50" />
+              <circle cx="70" cy="50.5" r="1" fill="#ffffff" />
+              <!-- Muzzle -->
+              <ellipse cx="60" cy="68" rx="18" ry="11" fill="#ffccd5" />
+              <circle cx="54" cy="67" r="2.2" fill="#d08b9b" />
+              <circle cx="66" cy="67" r="2.2" fill="#d08b9b" />
+              <path d="M57 72 Q60 74 63 72" fill="none" stroke="#d08b9b" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Cheeks -->
+              <circle cx="44" cy="60" r="2" fill="#ff9999" opacity="0.7"/>
+              <circle cx="76" cy="60" r="2" fill="#ff9999" opacity="0.7"/>
+            </svg>
+            <div class="banner-floating-coins">
+              <div class="banner-coin c1" style="transform: rotate(5deg);">₹</div>
+              <div class="banner-coin c2" style="transform: rotate(-10deg);">₹</div>
+              <div class="banner-coin c3" style="transform: rotate(15deg);">₹</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="banner-footer">
+          <div class="slider-dots">
+            <div class="dot"></div>
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Card -->
+      <div class="balance-card">
+        <div class="balance-header">
+          <h3 class="balance-title">My IToken</h3>
+          <span class="exchange-rate">1 Rs = 1 IToken, 1 USDT &approx; 106.7 IToken</span>
+        </div>
+
+        <div class="balance-display-row">
+          <div class="balance-amount-wrapper">
+            <div class="flag-circle">
+              <div class="flag-stripe orange"></div>
+              <div class="flag-stripe white">
+                <div class="flag-wheel"></div>
+              </div>
+              <div class="flag-stripe green"></div>
+            </div>
+            <div class="balance-value">221.89</div>
+          </div>
+
+          <a href="upibuyplus.html" class="buy-btn" style="text-decoration: none;">
+            <span class="rupee-circle">₹</span>
+            Buy
+          </a>
+        </div>
+
+        <!-- Details and History Action Grid -->
+        <div class="stats-layout">
+          <div class="stats-left-col">
+            <div class="stat-box">
+              <span class="stat-label">Today Profit</span>
+              <span class="stat-value">0</span>
+            </div>
+            
+            <div class="stat-box">
+              <span class="stat-label">Reward</span>
+              <span class="stat-value">2.5%</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-label">Auto Selling</span>
+              <span class="stat-value">Sell Set</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-label">Sell Faster</span>
+              <span class="stat-value stat-value link">Link Upi</span>
+            </div>
+          </div>
+
+          <div class="stats-left-col">
+            <div class="history-card" style="margin-bottom: 8px; flex: 1;">
+              Buy History
+            </div>
+            <div class="history-card" style="flex: 1;">
+              Sell History
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notice Bar -->
+      <div class="notice-bar">
+        <div class="notice-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Night-Time Buy Ratio Increased to 3.0%</span>
+        </div>
+        <div class="notice-info-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- News Section -->
+      <div class="news-card">
+        <div class="news-header">
+          <h4 class="news-title">News</h4>
+          <a href="#" class="news-more">More &gt;</a>
+        </div>
+        <div class="news-item">
+          <div class="news-item-title">Tips to Sell Tokens</div>
+          <div class="news-item-date">2025-09-06 19:43:12</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+    <!-- Bottom navigation tabs -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Home
+      </a>
+      <a href="upibuyplus.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        Buy
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        UPI
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Team
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Mine
+      </a>
+    </nav>
+
+    <!-- EVENT POPUP OVERLAY (ACTIVE BY DEFAULT) -->
+    <div class="modal-overlay" id="eventModal">
+      <div class="modal-content">
+        
+        <!-- CARD 1: 300 INR / PERSON -->
+        <div class="promo-card-blue">
+          <div class="promo-badge">300 INR / PERSON</div>
+          <div class="promo-body">
+            <ul class="promo-list">
+              <li>Go to the team page for invite detail.</li>
+              <li>Earn 300 INR for each successful referral.</li>
+              <li>New users get a 200 INR task reward.</li>
+              <li>More referrals = Higher rewards.</li>
+            </ul>
+            <div class="promo-image-container">
+              <!-- Premium Coins Stack SVG -->
+              <svg viewBox="0 0 100 100" style="width: 70px; height: 70px;">
+                <circle cx="50" cy="50" r="45" fill="#ffeaa7" opacity="0.15"/>
+                <!-- Stack 1 (Left) -->
+                <ellipse cx="38" cy="72" rx="16" ry="5.5" fill="#d35400" />
+                <ellipse cx="38" cy="70" rx="16" ry="5.5" fill="#f39c12" />
+                <ellipse cx="38" cy="68" rx="16" ry="5.5" fill="#f1c40f" />
+                
+                <ellipse cx="38" cy="64" rx="16" ry="5.5" fill="#d35400" />
+                <ellipse cx="38" cy="62" rx="16" ry="5.5" fill="#f39c12" />
+                <ellipse cx="38" cy="60" rx="16" ry="5.5" fill="#f1c40f" />
+
+                <ellipse cx="38" cy="56" rx="16" ry="5.5" fill="#d35400" />
+                <ellipse cx="38" cy="54" rx="16" ry="5.5" fill="#f39c12" />
+                <ellipse cx="38" cy="52" rx="16" ry="5.5" fill="#fecb2f" />
+                
+                <!-- Stack 2 (Right/Front) -->
+                <ellipse cx="62" cy="76" rx="18" ry="6" fill="#d35400" />
+                <ellipse cx="62" cy="74" rx="18" ry="6" fill="#f39c12" />
+                <ellipse cx="62" cy="72" rx="18" ry="6" fill="#f1c40f" />
+
+                <ellipse cx="62" cy="68" rx="18" ry="6" fill="#d35400" />
+                <ellipse cx="62" cy="66" rx="18" ry="6" fill="#f39c12" />
+                <ellipse cx="62" cy="64" rx="18" ry="6" fill="#f1c40f" />
+                
+                <ellipse cx="62" cy="60" rx="18" ry="6" fill="#d35400" />
+                <ellipse cx="62" cy="58" rx="18" ry="6" fill="#f39c12" />
+                <ellipse cx="62" cy="56" rx="18" ry="6" fill="#ffeaa7" />
+                <text x="62" y="59" font-family="Arial" font-size="7" font-weight="bold" fill="#d35400" text-anchor="middle">₹</text>
+
+                <!-- Floating top coin -->
+                <g transform="translate(50, 26) rotate(-15)">
+                  <ellipse cx="0" cy="0" rx="13" ry="6" fill="#d35400" />
+                  <ellipse cx="0" cy="-2" rx="13" ry="6" fill="#f39c12" />
+                  <ellipse cx="0" cy="-4" rx="13" ry="6" fill="#ffeaa7" />
+                  <text x="0" y="-2" font-family="Arial" font-size="6.5" font-weight="bold" fill="#d35400" text-anchor="middle">₹</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section-title">BUY ORDER REWARDS</div>
+
+        <!-- CARD 2: BUY ORDER REWARDS -->
+        <div class="promo-card-darkblue">
+          <!-- Puzzle piece SVG top right -->
+          <div style="position: absolute; top: -6px; right: 8px; width: 32px; height: 32px; opacity: 0.85; transform: rotate(15deg);">
+            <svg viewBox="0 0 24 24" fill="#fecb2f">
+              <path d="M20 12c0-1.1-.9-2-2-2V7c0-1.1-.9-2-2-2h-3c0-1.1-.9-2-2-2s-2 .9-2 2H7c-1.1 0-2 .9-2 2v3c-1.1 0-2 .9-2 2s.9 2 2 2v3c0 1.1.9 2 2 2h3c0 1.1.9 2 2 2s2-.9 2-2h3c1.1 0 2-.9 2-2v-3c1.1 0 2-.9 2-2z"/>
+            </svg>
+          </div>
+          <!-- Coin decorative shapes -->
+          <div style="position: absolute; bottom: 8px; right: 4px; width: 15px; height: 15px; background: radial-gradient(circle, #ffe066 30%, #f5b041 90%); border: 0.8px solid #d35400; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #d35400; transform: rotate(15deg); box-shadow: 0 1px 3px rgba(0,0,0,0.15);">₹</div>
+          <div style="position: absolute; top: 38px; left: -4px; width: 13px; height: 13px; background: radial-gradient(circle, #ffe066 30%, #f5b041 90%); border: 0.8px solid #d35400; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: bold; color: #d35400; transform: rotate(-20deg); box-shadow: 0 1px 3px rgba(0,0,0,0.15);">₹</div>
+
+          <div class="event-banner-header">
+            <span class="event-brand">Sixpay</span>
+            <h3 class="event-title">THE LATEST EVENT IS LIVE</h3>
+            <p class="event-subtitle">Earn Tokens Faster Than Ever</p>
+            <p class="event-action">BUY ORDER REWARDS</p>
+          </div>
+          <div class="rewards-grid">
+            <div class="rewards-col">
+              <div class="reward-row"><span class="bullet">*</span>Buy order 50,000 — 200 Tokens</div>
+              <div class="reward-row"><span class="bullet">*</span>Buy order 70,000 — 300 Tokens</div>
+              <div class="reward-row"><span class="bullet">*</span>Buy order 90,000 — 400 Tokens</div>
+              <div class="reward-row"><span class="bullet">*</span>Buy order 110,000 — 500 Tokens</div>
+              <div class="reward-row"><span class="bullet">*</span>Buy order 130,000 — 600 Tokens</div>
+              <div class="reward-row"><span class="bullet">*</span>Buy order 150,000 — 700 Tokens</div>
+            </div>
+            <div class="rewards-col">
+              <div class="reward-row">Buy order 170,000 — 800 Tokens</div>
+              <div class="reward-row">Buy order 190,000 — 900 Tokens</div>
+              <div class="reward-row">Buy order 210,000 — 1000 Tokens</div>
+              <div class="reward-row">Buy order 230,000 — 1100 Tokens</div>
+              <div class="reward-row">Buy order 250,000 — 1200 Tokens</div>
+            </div>
+          </div>
+          <div class="event-footer">
+            <p>Rewards are settled daily at 00:00 in the APP. Only the highest reward will be credit each day.</p>
+            <p class="highlight">Don't MISS OUT - Call your friends now and easily win a huge amount of tokens</p>
+          </div>
+        </div>
+
+        <div class="modal-section-title">YESTERDAY TEAM COMMISSION</div>
+
+        <!-- CARD 3: YESTERDAY TEAM COMMISSION -->
+        <div class="promo-card-yellow">
+          <!-- Floating Cash bill illustration -->
+          <div style="position: absolute; bottom: 8px; left: 8px; width: 26px; height: 15px; background: #e8f5e9; border: 0.8px solid #4caf50; border-radius: 2px; color: #388e3c; font-size: 7px; font-weight: bold; display: flex; align-items: center; justify-content: center; transform: rotate(-15deg); box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="border: 0.8px solid #81c784; border-radius: 1px; padding: 0 1.5px;">$</span>
+          </div>
+          <!-- Floating coins -->
+          <div style="position: absolute; top: 10px; right: 10px; width: 14px; height: 14px; background: radial-gradient(circle, #ffe066 30%, #f5b041 90%); border: 0.8px solid #d35400; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #d35400; transform: rotate(10deg); box-shadow: 0 1.5px 3px rgba(0,0,0,0.15);">₹</div>
+          <div style="position: absolute; top: 46px; left: 6px; width: 13px; height: 13px; background: radial-gradient(circle, #ffe066 30%, #f5b041 90%); border: 0.8px solid #d35400; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7.5px; font-weight: bold; color: #d35400; transform: rotate(-10deg); box-shadow: 0 1.5px 3px rgba(0,0,0,0.15);">₹</div>
+
+          <div class="event-banner-header text-dark">
+            <span class="event-brand brand-dark">Sixpay</span>
+            <h3 class="event-title title-teal">Long Term Event</h3>
+            <p class="event-subtitle subtitle-orange">Yesterday Team Commission</p>
+          </div>
+          <div class="commission-list">
+            <div class="commission-row">Reach 500-1000, get 300 bonus</div>
+            <div class="commission-row">Reach 1000-1500, get 500 bonus</div>
+            <div class="commission-row">Reach 1500-2000, get 900 bonus</div>
+            <div class="commission-row">Reach 2000-2500, get 1200 bonus</div>
+            <div class="commission-row">Reach 2500-3000, get 1500 bonus</div>
+            <div class="commission-row">Reach 3000-3500, get 1800 bonus</div>
+            <div class="commission-row">Reach 3500-4000, get 2000 bonus</div>
+          </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="modal-confirm-container">
+          <button class="confirm-btn" onclick="closeModal()">Confirm</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function closeModal() {
+      const modal = document.getElementById('eventModal');
+      modal.style.transition = 'opacity 0.25s ease, visibility 0.25s';
+      modal.style.opacity = '0';
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 250);
+    }
+  </script>
+</body>
+</html>

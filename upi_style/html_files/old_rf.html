@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Invite Friends Rewards</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --red-alert: #e74c3c;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-back {
+      color: #2c3e50;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .header-back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0 auto;
+      transform: translateX(-12px); /* Centering offset */
+    }
+
+    .content {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Blue statistics summary card */
+    .summary-card {
+      background: linear-gradient(135deg, #1fa2ff 0%, #12d6df 100%);
+      border-radius: 16px;
+      padding: 18px 14px;
+      color: #ffffff;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(31, 162, 255, 0.25);
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: bold;
+      opacity: 0.9;
+    }
+
+    .stat-val-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .coin-icon {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #ffe066 30%, #f5b041 90%);
+      border: 1px solid #d35400;
+      color: #d35400;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .stat-number {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Red description text */
+    .reminder-text {
+      color: var(--red-alert);
+      font-size: 12.5px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* Accordion header */
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1.5px solid #2c3e50;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+    }
+
+    .accordion-header svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s;
+    }
+
+    .accordion-header.collapsed svg {
+      transform: rotate(-90deg);
+    }
+
+    /* Friends list container */
+    .friends-list {
+      display: flex;
+      flex-direction: column;
+      transition: max-height 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    .friend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 4px;
+      border-bottom: 1px solid #f2f5f8;
+    }
+
+    .friend-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 40%;
+    }
+
+    .gift-icon {
+      width: 32px;
+      height: 32px;
+      background: #fdf2e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .gift-icon svg {
+      width: 16px;
+      height: 16px;
+      color: #e67e22;
+    }
+
+    .reward-value-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .friend-phone {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+      font-family: Arial, sans-serif;
+      flex: 1;
+      text-align: center;
+    }
+
+    /* Status badges */
+    .status-badge {
+      border: none;
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: inherit;
+      width: 84px;
+      text-align: center;
+    }
+
+    .status-badge.received {
+      background: #fef9e7;
+      color: #f1c40f;
+    }
+
+    .status-badge.undone {
+      background: #7f8c8d;
+      color: #ffffff;
+    }
+
+    /* Floating Chat Button */
+    .fab {
+      position: absolute;
+      bottom: 24px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- Header title -->
+    <header class="header">
+      <a href="agent.html" class="header-back">
+        <!-- Back chevron SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <h1 class="header-title">Invite Friends Rewards</h1>
+    </header>
+
+    <div class="content">
+      
+      <!-- Stats summary card -->
+      <div class="summary-card">
+        <div class="stat-box">
+          <span class="stat-label">Total bonus</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">600</span>
+          </div>
+        </div>
+        <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.25);">
+          <span class="stat-label">Done / All Friends</span>
+          <div class="stat-val-wrapper">
+            <span class="stat-number">2/25</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Received bonus</span>
+          <div class="stat-val-wrapper">
+            <div class="coin-icon">₹</div>
+            <span class="stat-number">600</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning reminder -->
+      <p class="reminder-text">
+        Warning: You need to remind your friends to complete the newbie tasks and receive rewards
+      </p>
+
+      <!-- Accordion Header list -->
+      <div class="accordion-header" id="listToggle" onclick="toggleFriendsList()">
+        <span>Show Your Friends</span>
+        <!-- Down chevron SVG -->
+        <svg id="chevronIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <!-- Scrollable list of invited friends -->
+      <div class="friends-list" id="friendsList">
+        
+        <!-- Friend 1 (Received) -->
+        <div class="friend-row">
+          <div class="friend-left">
+            <div class="gift-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-value-row">
+              <div class="coin-icon" style="width: 14px; height: 14px; font-size: 8px;">₹</div>
+              <span>300</span>
+            </div>
+          </div>
+          <span class="friend-phone">6207088276</span>
+          <button class="status-badge received">Received</button>
+        </div>
+
+        <!-- Friend 2 (Undone) -->
+        <div class="friend-row">
+          <div class="friend-left">
+            <div class="gift-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-value-row">
+              <div class="coin-icon" style="width: 14px; height: 14px; font-size: 8px;">₹</div>
+              <span>300</span>
+            </div>
+          </div>
+          <span class="friend-phone">6378290746</span>
+          <button class="status-badge undone">Undone</button>
+        </div>
+
+        <!-- Friend 3 (Undone) -->
+        <div class="friend-row">
+          <div class="friend-left">
+            <div class="gift-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-value-row">
+              <div class="coin-icon" style="width: 14px; height: 14px; font-size: 8px;">₹</div>
+              <span>300</span>
+            </div>
+          </div>
+          <span class="friend-phone">7380496585</span>
+          <button class="status-badge undone">Undone</button>
+        </div>
+
+        <!-- Friend 4 (Undone) -->
+        <div class="friend-row">
+          <div class="friend-left">
+            <div class="gift-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-value-row">
+              <div class="coin-icon" style="width: 14px; height: 14px; font-size: 8px;">₹</div>
+              <span>300</span>
+            </div>
+          </div>
+          <span class="friend-phone">7415413925</span>
+          <button class="status-badge undone">Undone</button>
+        </div>
+
+        <!-- Friend 5 (Undone) -->
+        <div class="friend-row">
+          <div class="friend-left">
+            <div class="gift-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="22" x2="12" y2="8"></line>
+                <path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"></path>
+              </svg>
+            </div>
+            <div class="reward-value-row">
+              <div class="coin-icon" style="width: 14px; height: 14px; font-size: 8px;">₹</div>
+              <span>300</span>
+            </div>
+          </div>
+          <span class="friend-phone">7615923662</span>
+          <button class="status-badge undone">Undone</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+  </div>
+
+  <script>
+    let isListCollapsed = false;
+
+    function toggleFriendsList() {
+      const list = document.getElementById('friendsList');
+      const header = document.getElementById('listToggle');
+      const chevron = document.getElementById('chevronIcon');
+
+      if (isListCollapsed) {
+        list.style.display = 'flex';
+        header.classList.remove('collapsed');
+        chevron.style.transform = 'rotate(0deg)';
+        isListCollapsed = false;
+      } else {
+        list.style.display = 'none';
+        header.classList.add('collapsed');
+        chevron.style.transform = 'rotate(-90deg)';
+        isListCollapsed = true;
+      }
+    }
+  </script>
+</body>
+</html>

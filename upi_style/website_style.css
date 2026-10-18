@@ -1,0 +1,252 @@
+/* website_style.css - Premium Global Styles for NextPay User Portal */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    --blue: #2395ee;
+    --deep-blue: #0b69bc;
+    --soft-blue: rgba(35, 149, 238, 0.05);
+    --line: rgba(0, 0, 0, 0.04);
+    --muted: #8c9cb5;
+    --bg-color: #f6f8fb;
+    --text-dark: #1e293b;
+    --accent-orange: #ff9933;
+    --accent-green: #10b981;
+    --card-bg: #ffffff;
+}
+
+body {
+    background: radial-gradient(circle at 50% 50%, #eef2f6 0%, #dfe5eb 100%);
+    color: var(--text-dark);
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Center Mobile Screen Containment */
+.screen {
+    width: min(100%, 574px) !important;
+    min-height: 100vh;
+    background: var(--bg-color) !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08) !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.02);
+    border-right: 1px solid rgba(0, 0, 0, 0.02);
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Make Typography Elegant */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px;
+}
+
+/* Banner Slider Improvements */
+.banner {
+    background: linear-gradient(135deg, #2395ee 0%, #0b69bc 100%) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 25px rgba(35, 149, 238, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.banner:hover {
+    transform: translateY(-2px);
+}
+
+.brand-name {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+}
+
+/* Token Balance Cards */
+.balance-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fbfdff 100%) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(35, 149, 238, 0.12) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02) !important;
+    padding: 20px !important;
+}
+
+.balance-title {
+    font-weight: 800 !important;
+    color: var(--text-dark) !important;
+}
+
+.balance-value {
+    font-weight: 900 !important;
+    color: #0f172a !important;
+    letter-spacing: -1px;
+}
+
+/* Premium Buttons */
+.buy-btn, .btn-primary, button[type="submit"]:not(.modal-overlay button) {
+    background: linear-gradient(135deg, #2395ee 0%, #0b69bc 100%) !important;
+    border-radius: 14px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 8px 20px rgba(35, 149, 238, 0.25) !important;
+    transition: all 0.25s ease !important;
+}
+
+.buy-btn:hover, .btn-primary:hover {
+    background: linear-gradient(135deg, #2b9eff 0%, #107bdc 100%) !important;
+    box-shadow: 0 10px 25px rgba(35, 149, 238, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+.buy-btn:active, .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Stats Box Elements */
+.stat-box {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+    transition: all 0.2s ease;
+}
+
+.stat-box:hover {
+    border-color: rgba(35, 149, 238, 0.15);
+    background-color: var(--soft-blue);
+}
+
+.stat-label {
+    font-weight: 700 !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-weight: 800 !important;
+    color: var(--text-dark) !important;
+}
+
+/* History Grid Cards */
+.history-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01) !important;
+    font-weight: 700 !important;
+    color: var(--text-dark) !important;
+    transition: all 0.25s ease !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.history-card:hover {
+    border-color: rgba(35, 149, 238, 0.2) !important;
+    background-color: var(--soft-blue) !important;
+    color: var(--blue) !important;
+    transform: translateY(-1px);
+}
+
+/* News Cards & News Lists */
+.news-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+    border-radius: 20px !important;
+    padding: 18px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.01) !important;
+}
+
+.news-title {
+    font-weight: 800 !important;
+    color: var(--text-dark) !important;
+}
+
+.news-item {
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+    background: #fbfcfd;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+    margin-top: 10px !important;
+    transition: all 0.2s ease;
+}
+
+.news-item:hover {
+    border-color: rgba(35, 149, 238, 0.15) !important;
+    background: var(--soft-blue);
+}
+
+/* Notice Bar Banner */
+.notice-bar {
+    background: rgba(255, 153, 51, 0.06) !important;
+    border: 1px solid rgba(255, 153, 51, 0.15) !important;
+    border-radius: 14px !important;
+    color: #e67e22 !important;
+    padding: 12px 16px !important;
+}
+
+/* Bottom Tab Navigation Bar */
+.bottom-nav {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.03) !important;
+    height: 72px !important;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+    font-weight: 600 !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    transition: all 0.2s ease !important;
+}
+
+.nav-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin-bottom: 3px !important;
+    transition: transform 0.2s ease !important;
+}
+
+.nav-item:hover svg {
+    transform: translateY(-1px);
+}
+
+.nav-item.active {
+    color: var(--blue) !important;
+}
+
+.nav-item.active svg {
+    color: var(--blue) !important;
+    transform: scale(1.05);
+}
+
+/* Beautiful Floating Action Button (FAB) */
+.fab {
+    background: linear-gradient(135deg, #2395ee 0%, #0b69bc 100%) !important;
+    box-shadow: 0 8px 25px rgba(35, 149, 238, 0.4) !important;
+    transition: all 0.25s ease !important;
+}
+
+.fab:hover {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 10px 30px rgba(35, 149, 238, 0.5) !important;
+}
+
+/* Modernized Inputs & Form Elements */
+input[type="text"], input[type="password"], input[type="tel"], input[type="number"], select {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+.field {
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    transition: all 0.25s ease !important;
+}
+
+.field:focus-within {
+    border-color: var(--blue) !important;
+    box-shadow: 0 0 0 3px rgba(35, 149, 238, 0.15) !important;
+}

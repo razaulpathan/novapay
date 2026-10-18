@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Tutorial Video</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-back {
+      color: #2c3e50;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .header-back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0 auto;
+      transform: translateX(-12px); /* Centering offset */
+    }
+
+    .content {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Video Player Container */
+    .video-player-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #2c3e50 0%, #0f171e 100%);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Big Center Play Overlay */
+    .play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background-color 0.2s;
+      z-index: 5;
+    }
+
+    .play-overlay:hover {
+      transform: translate(-50%, -50%) scale(1.06);
+      background: #ffffff;
+    }
+
+    .play-overlay:active {
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+
+    .play-overlay svg {
+      width: 28px;
+      height: 28px;
+      color: #000000;
+      margin-left: 4px; /* Align visual center of play arrow */
+    }
+
+    /* Video controls block at bottom */
+    .video-controls {
+      width: 100%;
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+      z-index: 4;
+    }
+
+    .control-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+    }
+
+    .time-display {
+      opacity: 0.95;
+    }
+
+    .controls-right-side {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-icon {
+      cursor: pointer;
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+
+    .control-icon:hover {
+      opacity: 1;
+    }
+
+    .control-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Seekbar styling */
+    .seekbar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .seekbar-progress {
+      width: 15%; /* Mock progress */
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .seekbar-handle {
+      width: 12px;
+      height: 12px;
+      background: #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      right: -6px;
+      top: -4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Floating Chat Button */
+    .fab {
+      position: absolute;
+      bottom: 24px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    
+    <!-- Header title -->
+    <header class="header">
+      <a href="mine.html" class="header-back">
+        <!-- Back chevron SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <h1 class="header-title">Tutorial Video</h1>
+    </header>
+
+    <div class="content">
+      
+      <!-- Video player UI block -->
+      <div class="video-player-container">
+        
+        <!-- Big Play Button Center -->
+        <div class="play-overlay" onclick="alert('Playing beginner tutorial video...')">
+          <!-- Play icon SVG -->
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </div>
+
+        <!-- Controls panel bottom -->
+        <div class="video-controls">
+          
+          <div class="control-top-row">
+            <span class="time-display">0:00</span>
+            
+            <div class="controls-right-side">
+              <!-- Speaker icon -->
+              <span class="control-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </span>
+              <!-- Full screen icon -->
+              <span class="control-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </span>
+              <!-- Menu dots icon -->
+              <span class="control-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Seekbar progress -->
+          <div class="seekbar-container" onclick="alert('Seeking video...')">
+            <div class="seekbar-progress">
+              <div class="seekbar-handle"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+  </div>
+</body>
+</html>

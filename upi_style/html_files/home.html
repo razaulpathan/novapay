@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay Home</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --accent-orange: #ff9933;
+      --accent-green: #138808;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: var(--bg-color);
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollable content area */
+    .content {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Banner Slider Card */
+    .banner {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #0b5cd3 0%, #053b92 100%);
+      border-radius: 16px;
+      color: white;
+      padding: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(11, 92, 211, 0.2);
+    }
+
+    /* Tricolor flag accent on the right of the banner */
+    .banner-flag-accent {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 45%;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    .banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo-mark {
+      width: 24px;
+      height: 28px;
+    }
+
+    .brand-name {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .upi-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1;
+    }
+
+    .upi-logo-text {
+      font-size: 16px;
+      font-weight: 900;
+      font-style: italic;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .upi-logo-text span {
+      color: #ff9933;
+    }
+
+    .upi-logo-text span:last-child {
+      color: #138808;
+    }
+
+    .upi-sub {
+      font-size: 6px;
+      font-weight: bold;
+      opacity: 0.8;
+      letter-spacing: 0.2px;
+    }
+
+    .banner-body {
+      max-width: 60%;
+      z-index: 2;
+      margin-top: 10px;
+    }
+
+    .banner-title {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1.2;
+      margin: 0 0 6px 0;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .banner-title svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .banner-subtitle {
+      font-size: 10px;
+      opacity: 0.9;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .banner-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 2;
+    }
+
+    /* Gold coins stacking */
+    .coins-stack {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      margin-bottom: -4px;
+    }
+
+    .coin-single {
+      width: 16px;
+      height: 16px;
+      background: radial-gradient(circle, #ffe066 30%, #f5b041 90%);
+      border-radius: 50%;
+      border: 1px solid #d35400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+      color: #d35400;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .coin-pile {
+      position: relative;
+      width: 24px;
+      height: 16px;
+    }
+
+    .coin-pile .coin {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #ffe066 30%, #f5b041 90%);
+      border-radius: 50%;
+      border: 1px solid #d35400;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .coin-pile .coin:nth-child(1) { bottom: 0; left: 0; }
+    .coin-pile .coin:nth-child(2) { bottom: 0; left: 8px; }
+    .coin-pile .coin:nth-child(3) { bottom: 4px; left: 4px; z-index: 2; }
+
+    /* Slider Dots Indicators */
+    .slider-dots {
+      display: flex;
+      gap: 4px;
+      margin-left: 20px;
+      margin-bottom: 2px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .dot.active {
+      width: 18px;
+      border-radius: 3px;
+      background: #ffffff;
+    }
+
+    /* IToken Balance Card Section */
+    .balance-card {
+      margin-top: 16px;
+      background: #fffdf4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23f9ebd2" stroke-width="1.5" stroke-dasharray="4,4"/><path d="M42 35 h16 M42 45 h16 M50 35 v30 M42 65 h16" fill="none" stroke="%23f9ebd2" stroke-width="2"/></svg>') repeat;
+      background-size: 120px;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #f2e6cb;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .balance-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .balance-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #3f3d32;
+      margin: 0;
+    }
+
+    .exchange-rate {
+      font-size: 11px;
+      color: #8c8877;
+      font-family: Arial, sans-serif;
+    }
+
+    .balance-display-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .balance-amount-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flag-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flag-stripe {
+      height: 14px;
+      width: 100%;
+    }
+
+    .flag-stripe.orange { background: #ff9933; }
+    .flag-stripe.white {
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .flag-stripe.green { background: #138808; }
+    .flag-wheel {
+      width: 8px;
+      height: 8px;
+      border: 1px solid #000080;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .flag-wheel::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #000080 20%, transparent 30%);
+    }
+
+    .balance-value {
+      font-size: 40px;
+      font-weight: 900;
+      color: #2b2b2b;
+      line-height: 1;
+    }
+
+    /* Buy button */
+    .buy-btn {
+      background: #1c82e6;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(28, 130, 230, 0.3);
+      font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .buy-btn:hover {
+      background: #0f6fcd;
+    }
+
+    .buy-btn:active {
+      transform: scale(0.97);
+    }
+
+    .rupee-circle {
+      width: 22px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* Statistics Grid Layout */
+    .stats-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stats-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #7d7d7d;
+      font-weight: bold;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      color: #111111;
+      font-weight: 900;
+    }
+
+    .stat-value.link {
+      color: #1c82e6;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* History Button Styles */
+    .history-card {
+      background: #ffffff;
+      border: 1px solid #e1e8ed;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #2c3e50;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      min-height: 52px;
+    }
+
+    .history-card:hover {
+      background-color: #fafbfc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Notice Bar section */
+    .notice-bar {
+      margin-top: 14px;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .notice-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #555555;
+    }
+
+    .notice-left svg {
+      color: #888888;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .notice-info-btn {
+      color: #b8c0c8;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .notice-info-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* News Feed Section */
+    .news-card {
+      margin-top: 14px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f5f7fa;
+      padding-bottom: 8px;
+    }
+
+    .news-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #111111;
+      margin: 0;
+    }
+
+    .news-more {
+      font-size: 13px;
+      color: #95a5a6;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+    }
+
+    .news-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .news-item-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333333;
+    }
+
+    .news-item-date {
+      font-size: 11px;
+      color: #bdc3c7;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Floating Chat Action Button */
+    .fab {
+      position: absolute;
+      bottom: 96px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.2s;
+    }
+
+    .fab:hover {
+      transform: scale(1.05);
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Bottom Tab Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 574px);
+      height: 64px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+      width: 20%;
+      height: 100%;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--blue);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Media query styles */
+    @media (max-width: 430px) {
+      .balance-value {
+        font-size: 32px;
+      }
+      .flag-circle {
+        width: 36px;
+        height: 36px;
+      }
+      .flag-stripe {
+        height: 12px;
+      }
+      .buy-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      .stats-layout {
+        gap: 8px;
+      }
+      .history-card {
+        padding: 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="content">
+      
+      <!-- Top banner slider -->
+      <div class="banner">
+        <!-- SVG flag overlay decoration -->
+        <svg class="banner-flag-accent" viewBox="0 0 180 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Tricolor waves in background -->
+          <path d="M120 0 C135 40, 110 80, 130 130 C145 170, 160 190, 180 200 L180 0 Z" fill="#138808" fill-opacity="0.25"/>
+          <path d="M90 0 C110 50, 95 90, 110 140 C125 180, 150 190, 180 200 L180 0 Z" fill="#ffffff" fill-opacity="0.15"/>
+          <path d="M60 0 C80 40, 70 80, 90 130 C105 175, 130 190, 180 200 L180 0 Z" fill="#ff9933" fill-opacity="0.2"/>
+          <!-- Indian flag motif circle on far right -->
+          <circle cx="160" cy="80" r="30" fill="none" stroke="#ff9933" stroke-width="3" opacity="0.3"/>
+          <circle cx="160" cy="80" r="24" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.4"/>
+          <circle cx="160" cy="80" r="18" fill="none" stroke="#138808" stroke-width="3" opacity="0.3"/>
+          <circle cx="160" cy="80" r="12" fill="none" stroke="#000080" stroke-width="1.5" opacity="0.3"/>
+        </svg>
+
+        <div class="banner-header">
+          <div class="logo-container">
+            <svg class="logo-mark" viewBox="0 0 160 185" role="img" aria-label="Sixpay logo">
+              <path d="M109 2C70 4 35 27 17 62-6 106 9 163 51 180c39 16 88-3 102-44 12-36-5-77-40-94-14-7-31-9-44-5-5 2-8-5-4-9C75 18 89 11 109 8c5-1 7-7 0-6Z" fill="#ffffff"/>
+              <rect x="44" y="95" width="72" height="54" rx="12" fill="none" stroke="#0b5cd3" stroke-width="8"/>
+              <rect x="61" y="114" width="18" height="12" rx="3" fill="#0b5cd3"/>
+              <path d="M106 49c16 7 25 20 28 38" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+              <path d="M119 30c23 10 36 29 39 55" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+              <path d="M94 67c9 5 15 13 17 24" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+            </svg>
+            <div class="brand-name">SIXPAY</div>
+          </div>
+          <div class="upi-brand">
+            <div class="upi-logo-text">U<span>P</span>I</div>
+            <div class="upi-sub">NATIVE THIRD PARTY PAYMENT</div>
+          </div>
+        </div>
+
+        <div class="banner-body">
+          <h2 class="banner-title">
+            Invite your friends with your referral link
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </h2>
+          <p class="banner-subtitle">Earn referral rewards and profit on first sign-up</p>
+        </div>
+
+        <div class="banner-footer">
+          <div class="coins-stack">
+            <div class="coin-single">₹</div>
+            <div class="coin-pile">
+              <div class="coin"></div>
+              <div class="coin"></div>
+              <div class="coin"></div>
+            </div>
+          </div>
+          <div class="slider-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Card -->
+      <div class="balance-card">
+        <div class="balance-header">
+          <h3 class="balance-title">My IToken</h3>
+          <span class="exchange-rate">1 Rs = 1 IToken, 1 USDT &approx; 106.7 IToken</span>
+        </div>
+
+        <div class="balance-display-row">
+          <div class="balance-amount-wrapper">
+            <!-- Round Indian Flag -->
+            <div class="flag-circle">
+              <div class="flag-stripe orange"></div>
+              <div class="flag-stripe white">
+                <div class="flag-wheel"></div>
+              </div>
+              <div class="flag-stripe green"></div>
+            </div>
+            <div class="balance-value">221.89</div>
+          </div>
+
+          <a href="upibuyplus.html" class="buy-btn" style="text-decoration: none;">
+            <span class="rupee-circle">₹</span>
+            Buy
+          </a>
+        </div>
+
+        <!-- Details and History Action Grid -->
+        <div class="stats-layout">
+          <!-- Column 1: Info Labels -->
+          <div class="stats-left-col">
+            <div class="stat-box">
+              <span class="stat-label">Today Profit</span>
+              <span class="stat-value">0</span>
+            </div>
+            
+            <div class="stat-box">
+              <span class="stat-label">Reward</span>
+              <span class="stat-value">2.5%</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-label">Auto Selling</span>
+              <span class="stat-value">Sell Set</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-label">Sell Faster</span>
+              <span class="stat-value stat-value link">Link Upi</span>
+            </div>
+          </div>
+
+          <!-- Column 2: History Buttons -->
+          <div class="stats-left-col">
+            <div class="history-card" style="margin-bottom: 8px; flex: 1;">
+              Buy History
+            </div>
+            <div class="history-card" style="flex: 1;">
+              Sell History
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notice Bar -->
+      <div class="notice-bar">
+        <div class="notice-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Night-Time Buy Ratio Increased to 3.0%</span>
+        </div>
+        <div class="notice-info-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- News Section -->
+      <div class="news-card">
+        <div class="news-header">
+          <h4 class="news-title">News</h4>
+          <a href="#" class="news-more">More &gt;</a>
+        </div>
+        <div class="news-item">
+          <div class="news-item-title">Tips to Sell Tokens</div>
+          <div class="news-item-date">2025-09-06 19:43:12</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+    <!-- Bottom navigation tabs -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Home
+      </a>
+      <a href="upibuyplus.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        Buy
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        UPI
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Team
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Mine
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

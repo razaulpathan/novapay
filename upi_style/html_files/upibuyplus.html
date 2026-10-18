@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sixpay - Buy (UPI Plus)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #2395ee;
+      --deep-blue: #07588f;
+      --soft-blue: #f8fcff;
+      --line: #e8f1f7;
+      --muted: #b8c0c8;
+      --bg-color: #f7f9fc;
+      --text-dark: #333333;
+      --accent-red: #e74c3c;
+      --accent-orange: #f39c12;
+      --accent-blue: #1c82e6;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--text-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen {
+      width: min(100%, 574px);
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page Header */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #f5f7fa;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    /* Tab navigation */
+    .sub-tabs {
+      display: flex;
+      width: 100%;
+      border-bottom: 1px solid #f0f3f6;
+      background: #ffffff;
+    }
+
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 0;
+      text-decoration: none;
+      color: #7f8c8d;
+      font-size: 15px;
+      font-weight: bold;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab-item.active {
+      color: var(--blue);
+    }
+
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 35%;
+      width: 30%;
+      height: 3px;
+      background: var(--blue);
+      border-radius: 2px;
+    }
+
+    /* Content Scroll Area */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+
+    /* Filter Bar styling */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f0f3f6;
+      background: #ffffff;
+    }
+
+    .filter-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .arrow-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arrow-controls svg {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .arrow-up {
+      color: var(--blue);
+    }
+
+    .arrow-down {
+      color: var(--muted);
+    }
+
+    .filter-limit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+
+    .filter-limit span.value {
+      color: #111111;
+      font-weight: bold;
+    }
+
+    .filter-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-btn {
+      color: #f39c12;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .search-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* List of buy offers */
+    .offers-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .offer-item {
+      padding: 16px;
+      border-bottom: 1px solid #f2f5f8;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .offer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #7f8c8d;
+    }
+
+    .offer-no {
+      font-family: Arial, sans-serif;
+    }
+
+    .offer-reward-tag {
+      font-weight: bold;
+    }
+
+    .offer-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Math layout columns */
+    .offer-math {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .math-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .math-label {
+      font-size: 11px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .math-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* Colors for price/reward/itoken */
+    .math-price .math-label { color: var(--accent-red); }
+    .math-price .math-value { color: var(--accent-red); font-size: 20px; font-weight: 900;}
+
+    .math-reward .math-label { color: #333333; }
+    .math-reward .math-value { color: #333333; }
+
+    .math-itoken .math-label { color: var(--accent-blue); }
+    .math-itoken .math-value { color: var(--accent-blue); }
+
+    .math-operator {
+      font-size: 18px;
+      font-weight: bold;
+      color: #555555;
+      padding-top: 15px; /* Offset to align with values */
+    }
+
+    /* Buy Action Button */
+    .buy-btn-small {
+      background: #4fa7ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(79, 167, 255, 0.3);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .buy-btn-small:hover {
+      background: #2b91ff;
+    }
+
+    .buy-btn-small:active {
+      transform: scale(0.96);
+    }
+
+    /* Floating Chat Action Button */
+    .fab {
+      position: absolute;
+      bottom: 84px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      background: #3a6bf6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(58, 107, 246, 0.4);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Bottom tab bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 574px);
+      height: 64px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+      width: 20%;
+      height: 100%;
+    }
+
+    .nav-item.active {
+      color: var(--blue);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <!-- Header title -->
+    <header class="header">
+      <h1 class="header-title">Buy</h1>
+    </header>
+
+    <!-- Sub Navigation Tabs -->
+    <nav class="sub-tabs">
+      <a href="#" class="tab-item active">UPI Plus</a>
+      <a href="upibuy.html" class="tab-item">UPI</a>
+      <a href="usdtbuy.html" class="tab-item">USDT</a>
+    </nav>
+
+    <!-- Scrollable content area -->
+    <div class="content">
+      
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-left">
+          <div class="arrow-controls">
+            <!-- Up arrow -->
+            <svg class="arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            <!-- Down arrow -->
+            <svg class="arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="filter-limit">
+            <span>Min</span>
+            <span class="value">100</span>
+            <span>Max</span>
+            <span class="value">100000</span>
+          </div>
+        </div>
+        <div class="filter-right">
+          <div class="search-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Offers List (UPI Plus layout) -->
+      <div class="offers-list">
+        
+        <!-- Offer 1 -->
+        <div class="offer-item">
+          <div class="offer-header">
+            <span class="offer-no">No:5404689841130501</span>
+            <span class="offer-reward-tag">Reward 2.5%+5</span>
+          </div>
+          <div class="offer-body">
+            <div class="offer-math">
+              <div class="math-column math-price">
+                <span class="math-label">Price</span>
+                <span class="math-value">₹ 500</span>
+              </div>
+              <div class="math-operator">+</div>
+              <div class="math-column math-reward">
+                <span class="math-label">Reward</span>
+                <span class="math-value">17.5</span>
+              </div>
+              <div class="math-operator">=</div>
+              <div class="math-column math-itoken">
+                <span class="math-label">Itoken</span>
+                <span class="math-value">517.50</span>
+              </div>
+            </div>
+            <button class="buy-btn-small">Buy</button>
+          </div>
+        </div>
+
+        <!-- Offer 2 -->
+        <div class="offer-item">
+          <div class="offer-header">
+            <span class="offer-no">No:5405012923583493</span>
+            <span class="offer-reward-tag">Reward 2.5%+5</span>
+          </div>
+          <div class="offer-body">
+            <div class="offer-math">
+              <div class="math-column math-price">
+                <span class="math-label">Price</span>
+                <span class="math-value">₹ 500</span>
+              </div>
+              <div class="math-operator">+</div>
+              <div class="math-column math-reward">
+                <span class="math-label">Reward</span>
+                <span class="math-value">17.5</span>
+              </div>
+              <div class="math-operator">=</div>
+              <div class="math-column math-itoken">
+                <span class="math-label">Itoken</span>
+                <span class="math-value">517.50</span>
+              </div>
+            </div>
+            <button class="buy-btn-small">Buy</button>
+          </div>
+        </div>
+
+        <!-- Offer 3 -->
+        <div class="offer-item">
+          <div class="offer-header">
+            <span class="offer-no">No:5404551297895429</span>
+            <span class="offer-reward-tag">Reward 2.5%+5</span>
+          </div>
+          <div class="offer-body">
+            <div class="offer-math">
+              <div class="math-column math-price">
+                <span class="math-label">Price</span>
+                <span class="math-value">₹ 500</span>
+              </div>
+              <div class="math-operator">+</div>
+              <div class="math-column math-reward">
+                <span class="math-label">Reward</span>
+                <span class="math-value">17.5</span>
+              </div>
+              <div class="math-operator">=</div>
+              <div class="math-column math-itoken">
+                <span class="math-label">Itoken</span>
+                <span class="math-value">517.50</span>
+              </div>
+            </div>
+            <button class="buy-btn-small">Buy</button>
+          </div>
+        </div>
+
+        <!-- Offer 4 -->
+        <div class="offer-item">
+          <div class="offer-header">
+            <span class="offer-no">No:5404562692049925</span>
+            <span class="offer-reward-tag">Reward 2.5%+5</span>
+          </div>
+          <div class="offer-body">
+            <div class="offer-math">
+              <div class="math-column math-price">
+                <span class="math-label">Price</span>
+                <span class="math-value">₹ 500</span>
+              </div>
+              <div class="math-operator">+</div>
+              <div class="math-column math-reward">
+                <span class="math-label">Reward</span>
+                <span class="math-value">17.5</span>
+              </div>
+              <div class="math-operator">=</div>
+              <div class="math-column math-itoken">
+                <span class="math-label">Itoken</span>
+                <span class="math-value">517.50</span>
+              </div>
+            </div>
+            <button class="buy-btn-small">Buy</button>
+          </div>
+        </div>
+
+        <!-- Offer 5 -->
+        <div class="offer-item">
+          <div class="offer-header">
+            <span class="offer-no">No:5404549472128005</span>
+            <span class="offer-reward-tag">Reward 2.5%+5</span>
+          </div>
+          <div class="offer-body">
+            <div class="offer-math">
+              <div class="math-column math-price">
+                <span class="math-label">Price</span>
+                <span class="math-value">₹ 500</span>
+              </div>
+              <div class="math-operator">+</div>
+              <div class="math-column math-reward">
+                <span class="math-label">Reward</span>
+                <span class="math-value">17.5</span>
+              </div>
+              <div class="math-operator">=</div>
+              <div class="math-column math-itoken">
+                <span class="math-label">Itoken</span>
+                <span class="math-value">517.50</span>
+              </div>
+            </div>
+            <button class="buy-btn-small">Buy</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="13" cy="10" r="1"></circle>
+        <circle cx="17" cy="10" r="1"></circle>
+      </svg>
+    </div>
+
+    <!-- Bottom tab bar navigation -->
+    <nav class="bottom-nav">
+      <a href="home.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Home
+      </a>
+      <a href="#" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        Buy
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        UPI
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Team
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Mine
+      </a>
+    </nav>
+  </div>
+</body>
+</html>
